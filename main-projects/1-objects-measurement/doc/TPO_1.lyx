@@ -1,0 +1,949 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language spanish-mexico
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style french
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\series bold
+Práctico: Medición de objetos usando CV
+\end_layout
+
+\begin_layout Date
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+date{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\size larger
+Visión por Computadoras
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\size large
+Afur Matías y Santamarina Gaspar
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace vfill
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+2018
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introducción
+\end_layout
+
+\begin_layout Standard
+El objetivo de este trabajo es diseñar un programa que permita realizar
+ la medición en escala real de objetos que se encuentran sobre un plano
+ conocido.
+ Para ello se utiliza un método donde no es necesario que el plano de medición
+ se encuentre paralelo al palno focal de la cámara.
+ Esto se lleva a cabo usando un patrón de calibración en el plano de medición,
+ permitiendo que la cámara pueda moverse libremente mientras realiza mediciones.
+ El script es desarrollado en Python 3.0, utilizando la librería OpenCV 4.1.0.
+\end_layout
+
+\begin_layout Section
+Desarrollo
+\end_layout
+
+\begin_layout Standard
+Para la medición es necesario primero hallar el patrón de calibración en
+ la escena y efectuar una transformación perspectiva para traerlo al plano
+ focal.
+ Una vez obtenido esto, se buscan contornos en la imagen que puedan representar
+ a los objetos que se están por medir.
+ A estos contornos se les dibuja un rectángulo en sus límites y se mide
+ el alto y ancho del objeto.
+ En el script se han definido dos funciones que realizan estas tareas.
+\end_layout
+
+\begin_layout Subsection
+Búsqueda y transformación: función 
+\emph on
+rectify()
+\end_layout
+
+\begin_layout Standard
+Se definió la función 
+\emph on
+rectify(frame) 
+\emph default
+a la que se le pasa como argumento el cuadro
+\emph on
+ 
+\emph default
+de video (
+\emph on
+frame
+\emph default
+) en el cual se efectúa la búsqueda del plano de medición y la transformación
+ de perspectiva.
+ Esta función devuelve un valor booleano y el cuadro (
+\emph on
+True
+\emph default
+ y el cuadro rectificado o 
+\emph on
+false
+\emph default
+ y el cuadro sin modificaciones).
+\end_layout
+
+\begin_layout Standard
+Para hallar el plano de medición se utilizó un patrón de calibración tipo
+ tablero de ajedrez de 4x5 como el de la figura 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:patron"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, y se llama a la función 
+\shape italic
+cv2.findChessboardCorners(image, patternSize, corners, flags)
+\shape default
+ a la que se le debe pasar como argumentos, la imagen donde debe buscar,
+ el tamaño del patrón (esquinas internas), la matriz de salida con las esquinas
+ encontradas y 
+\shape italic
+flags 
+\shape default
+de configuración.
+ Una vez encontradas las esquinas se refina la ubicación de estas mediante
+ 
+\shape italic
+cv2.
+\shape default
+\emph on
+cornerSubPix()
+\emph default
+ y se las dibuja con 
+\shape italic
+cv2.
+\shape default
+\emph on
+drawChessboardCorners().
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Checkerboard-4x3.png
+	width 50text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:patron"
+
+\end_inset
+
+Patrón de calibración 4x5 o 3x4 esquinas internas
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Los puntos encontrados pertenecientes a las esquinas son mapeados en un
+ rectángulo de dimensiones conocidas en 
+\emph on
+píxeles
+\emph default
+ que respetan la relación 
+\emph on
+ancho/alto 
+\emph default
+del patrón.
+ Para obtener la matriz de transformación se llama a la función 
+\shape italic
+cv2.
+\shape default
+\emph on
+getPerspectiveTransform(src, dst)
+\emph default
+, donde los argumentos son los vectores de puntos de las esquinas halladas
+ y los puntos del rectángulo donde se las desea mapear, respectivamente
+\emph on
+.
+ 
+\emph default
+Esta matriz se pasa como argumento a la función 
+\shape italic
+cv2.
+\shape default
+\emph on
+warpPerspective(drawedFrame, M, imgSize)
+\emph default
+ la cual devuelve la imagen rectificada.
+\end_layout
+
+\begin_layout Paragraph
+Código python:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\scriptsize\ttfamily},breaklines=true,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def rectify(frame):
+\end_layout
+
+\begin_layout Plain Layout
+
+global n, h, v
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+drawedFrame = frame.copy()     
+\end_layout
+
+\begin_layout Plain Layout
+
+grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # Escala de grises   
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+ret, corners = cv2.findChessboardCorners(grayFrame, chessboardSize, None,
+ cv2.CALIB_CB_FAST_CHECK)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+if ret is True:
+\end_layout
+
+\begin_layout Plain Layout
+
+	refinedCorners = cv2.cornerSubPix(grayFrame, corners, (11, 11), (-1, -1),
+ criteria)
+\end_layout
+
+\begin_layout Plain Layout
+
+	cv2.drawChessboardCorners(frame, (chessboardSize), refinedCorners, ret)
+                 
+\end_layout
+
+\begin_layout Plain Layout
+
+	imgSize = (frame.shape[1], frame.shape[0])                  
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Puntos a mapear         
+\end_layout
+
+\begin_layout Plain Layout
+
+	src = np.float32([corners[0], corners[3], corners[8], corners[11]])
+\end_layout
+
+\begin_layout Plain Layout
+
+	dst = np.float32([[508, 0], [640, 0], [508, 88], [640, 88]])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Matriz de transformacion
+\end_layout
+
+\begin_layout Plain Layout
+
+	M = cv2.getPerspectiveTransform(src, dst)
+\end_layout
+
+\begin_layout Plain Layout
+
+	rectifiedFrame = cv2.warpPerspective(drawedFrame, M, imgSize)
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+	return True, rectifiedFrame
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+else:
+\end_layout
+
+\begin_layout Plain Layout
+
+	return False, frame
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Contornos: función 
+\emph on
+getContours()
+\end_layout
+
+\begin_layout Standard
+Una vez hecha la transformación de perspectiva de la imagen se deben ubicar
+ los objetos a medir en al escena.
+ La estrategia para encontrarlos aquí es utilizar contornos.
+ Para esto se define 
+\emph on
+getCountours(frame) 
+\emph default
+la cual realiza los siguientes pasos:
+\end_layout
+
+\begin_layout Enumerate
+El cuadro o imagen se pasa a escala de grises.
+\end_layout
+
+\begin_layout Enumerate
+Se le aplica un filtro para difuminar el ruido.
+\end_layout
+
+\begin_layout Enumerate
+Se le aplica un límite binario para pasar a blanco y negro y sea mas fácil
+ la detección de los contornos.
+\end_layout
+
+\begin_layout Enumerate
+Se llama a la función 
+\emph on
+cv2.findContours(image, mode, method)
+\emph default
+ la cual devuelve 
+\emph on
+contours 
+\emph default
+y 
+\emph on
+hierarchy
+\emph default
+, donde 
+\emph on
+contours 
+\emph default
+son los contornos detectados almacenados en un vector de puntos y 
+\emph on
+hierarchy
+\emph default
+ contiene información a cerca de la topología de la imagen.
+\end_layout
+
+\begin_layout Enumerate
+Por último se dibujan los contornos en la imagen mediante la función 
+\emph on
+cv2.drawContours(image, contours, contourldx, color, thickness).
+\end_layout
+
+\begin_layout Paragraph
+
+\series bold
+Código python:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\scriptsize\ttfamily},breaklines=true,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def getContours(frame):
+\end_layout
+
+\begin_layout Plain Layout
+
+	global threshold
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Escala de grises
+\end_layout
+
+\begin_layout Plain Layout
+
+	imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Filtro blur para disminuir ruido
+\end_layout
+
+\begin_layout Plain Layout
+
+	imblur = cv2.blur(imgray, (10,10)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Threshold para pasar la imagen a B/N          
+\end_layout
+
+\begin_layout Plain Layout
+
+	ret, imthresh = cv2.threshold(imblur, threshold, 255, cv2.THRESH_BINARY)
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Parche     
+\end_layout
+
+\begin_layout Plain Layout
+
+	cv2.rectangle(imthresh, (400, 0), (640, 150), (255,255,255), -1)     
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Calculo de contornos     
+\end_layout
+
+\begin_layout Plain Layout
+
+	contornos, hierarchy = cv2.findContours(imthresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_
+SIMPLE)
+\end_layout
+
+\begin_layout Plain Layout
+
+	cv2.drawContours(frame, contornos, -1, (0,255,0), 3)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    return contornos, frame
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Medición 
+\end_layout
+
+\begin_layout Standard
+Para medir el objeto se obtiene un rectángulo al rededor de su contorno
+ mediante 
+\emph on
+cv2.boundingRect(contour)
+\emph default
+.
+ Esta función devuelve las coordenadas 
+\emph on
+x, y
+\emph default
+ y el ancho y alto del rectángulo en 
+\emph on
+píxeles
+\emph default
+.
+ Estas mediciones se dibujan en la imagen como lineas al rededor del objeto
+ mediante 
+\emph on
+cv2.line()
+\emph default
+ y su valor con 
+\emph on
+cv2.putText()
+\emph default
+ previamente transformada a 
+\emph on
+mm
+\emph default
+ mediante algún factor 
+\emph on
+mm/píxel.
+\end_layout
+
+\begin_layout Standard
+A continuación se muestra el código y las imágenes de las mediciones.
+\end_layout
+
+\begin_layout Paragraph
+
+\series bold
+Código python:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\scriptsize\ttfamily},breaklines=true,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+valid, rectifiedFrame = rectify(frame)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+if(valid):
+\end_layout
+
+\begin_layout Plain Layout
+
+	contornos, drawedFrame = getContours(rectifiedFrame.copy())
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+	# Medicion
+\end_layout
+
+\begin_layout Plain Layout
+
+	for contorno in contornos:
+\end_layout
+
+\begin_layout Plain Layout
+
+		x,y,contourW,contourH = cv2.boundingRect(contorno) # Rectangulo dentro
+ del cual esta comprendido el objeto a medir
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		cv2.line(drawedFrame, (x, y+contourH), (x+contourW, y+contourH), (0,0,255),
+ 2) # Ancho
+\end_layout
+
+\begin_layout Plain Layout
+
+		cv2.line(drawedFrame, (x+contourW, y), (x+contourW, y+contourH), (0,0,255),
+ 2) # Alto
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		# Paso a mm
+\end_layout
+
+\begin_layout Plain Layout
+
+		contourW_mm = round(mmpx * contourW, 2)
+\end_layout
+
+\begin_layout Plain Layout
+
+		contourH_mm = round(mmpx * contourH, 2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		# Etiquetas
+\end_layout
+
+\begin_layout Plain Layout
+
+		cv2.putText(drawedFrame, str(contourW_mm)+"mm", (round(x+contourW/2), y+contour
+H+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255)
+\end_layout
+
+\begin_layout Plain Layout
+
+		cv2.putText(drawedFrame, str(contourH_mm)+"mm", (x+contourW, round(y+contourH/2
+)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+else:
+\end_layout
+
+\begin_layout Plain Layout
+
+	drawedFrame = frame.copy()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+
+\series bold
+Imágenes
+\series default
+:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename captura_2.png
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename captura_3.png
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename captura_4.png
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusión 
+\end_layout
+
+\begin_layout Standard
+A modo de concluir, se puede nombrar las ventajas y desventajas de este
+ método y como se podría mejorar el algoritmo.
+ Una desventaja que se presentó fueron las sombras.
+ Al tratarse de un plano móvil este genera distintas sombras, de acuerdo
+ a su orientación, sobre los objetos a medir.
+ Esta sombra modifica las mediciones, ya que de acuerdo al nivel de 
+\emph on
+threshold,
+\emph default
+ la sombra pasa a formar parte de las dimensiones del objeto alterando las
+ mediciones.
+ La iluminación debe ser uniforme y pareja en el plano, para que este efecto
+ no influya drásticamente en los errores de medición o también se podrían
+ promediar las mediciones.
+ 
+\end_layout
+
+\begin_layout Standard
+Otra desventaja que se observa en las imágenes es que las mediciones varían
+ de acuerdo a la orientación, esto es debido al propio error de la transformació
+n perspectiva.
+ Una de las mejoras posibles para solucionar este efecto es la de realizar
+ la búsqueda de los contornos antes de efectuar la transformación; se transforma
+n los puntos de los contornos en vez de buscar los puntos en la imagen transform
+ada.
+ 
+\end_layout
+
+\begin_layout Standard
+Con respecto a las ventajas, existen algunas y son más obvias:
+\end_layout
+
+\begin_layout Itemize
+No hace falta tener un plano fijo para realizar las mediciones.
+\end_layout
+
+\begin_layout Itemize
+Se puede obtener mediciones de un objeto desde varias perspectivas.
+\end_layout
+
+\begin_layout Itemize
+Si las condiciones de iluminación son buenas las mediciones son confiables.
+\end_layout
+
+\begin_layout Standard
+Este tipo de prácticas son de suma utilidad en el mundo moderno donde la
+ visión por computadora está en auge.
+ Este algoritmo cumple con las pautas planteadas por la consigna y se desenvuelv
+e correctamente, pero siempre se puede seguir aplicando mejoras.
+ Queda claro que el uso de OpenCV es ilimitado y conforma una herramienta
+ poderosa en constante crecimiento.
+ Su difusión es importante para la ingeniería y una solución a problemas
+ actuales.
+\end_layout
+
+\end_body
+\end_document
